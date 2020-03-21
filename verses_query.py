@@ -1,5 +1,37 @@
-from flask import g, jsonify
+import sqlite3
 from poets_glossary import poets_name_glossary
+from random import randint
+
+
+
+
+
+connect = sqlite3.connect('database.sqlite')
+cur = connect.cursor()
+
+
+def random_verse_generator(poet=None):
+    if poet == None:
+        return randint(1, 1384003)
+    else:
+        select_poems = cur.execute('SELECT * FROM poems')
+        poems = select_poems.fetchall()
+
+        id = []
+        for each_tuple in poems:
+            if each_tuple[3] == '':
+                continue
+
+            url_feild = each_tuple[3]
+            print(url_feild)
+            poet_name = url_feild.split('/')[3]
+            if poet == poet_name:
+                id.append(each_tuple[0])
+        
+        id_lenght = len(id)
+        random_poemID =  randint(0, id_lenght)
+        return id[random_poemID]
+
 
 def query(verse):
     # Checking verse order in DB
@@ -12,7 +44,7 @@ def query(verse):
     order_count = 1 # Helps me to see how many times While_loop has been run.
     while True:
         new_id = (verse[0] + order_count) # Get the next verse of the random verse
-        order = g.cur.execute('SELECT * FROM verses WHERE id = ?', (new_id,))
+        order = cur.execute('SELECT * FROM verses WHERE id = ?', (new_id,))
         order_query = order.fetchone()
         if order_query[3] == 0: # checks if the next verse is related to random one
             break 
@@ -24,20 +56,20 @@ def query(verse):
 
     poem = []
     for i in range(verse[0], (verse[0] + order_sum)):
-        Select_whole_poem = g.cur.execute('SELECT * FROM verses WHERE id = ?', (i,))
+        Select_whole_poem = cur.execute('SELECT * FROM verses WHERE id = ?', (i,))
         fetch_poem = Select_whole_poem.fetchone()
         verses = str(fetch_poem[4])
         poem.append(verses)
 
     ## Query for the Poet name and Poem category
     Poem_ID = verse[1]
-    select_poems = g.cur.execute('SELECT * FROM poems WHERE id = ?', (Poem_ID,))
+    select_poems = cur.execute('SELECT * FROM poems WHERE id = ?', (Poem_ID,))
     query_poems = select_poems.fetchone()
 
 
     # Poem category
     category_id = int(query_poems[1])
-    select_category  = g.cur.execute('SELECT * FROM categories WHERE id = ?', (category_id,))
+    select_category  = cur.execute('SELECT * FROM categories WHERE id = ?', (category_id,))
     fetch_category = select_category.fetchone()
     poem_category = fetch_category[2]
     if poem_category not in poets_name_glossary.values() :    
@@ -50,4 +82,4 @@ def query(verse):
         poet_name = poets_name_glossary[poet_name]
         poem.insert(0, poet_name)
 
-    return jsonify(poem)
+    return str(poem)

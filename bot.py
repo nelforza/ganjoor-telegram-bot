@@ -3,6 +3,7 @@
 import logging
 from telegram.ext import Updater, CommandHandler, Filters, MessageHandler
 from poets_glossary import poets_name_glossary
+from verses_query import query, random_verse_generator
 
 
 # Logging 
@@ -58,10 +59,10 @@ def poets(update, context):
 
 def poem(update, context):
     chatID = update.effective_chat.id
-    text = 'شاعری با این اسم پیدا نشد!'
+    not_found_text = 'شاعری با این اسم پیدا نشد!'
     msg = update.message.text
     if msg not in poets_name_glossary.values():
-        context.bot.send_message(chat_id=chatID, text=text)
+        context.bot.send_message(chat_id=chatID, text=not_found_text)
 
 
 
