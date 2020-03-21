@@ -23,7 +23,6 @@ def random_verse_generator(poet=None):
                 continue
 
             url_feild = each_tuple[3]
-            print(url_feild)
             poet_name = url_feild.split('/')[3]
             if poet == poet_name:
                 id.append(each_tuple[0])
