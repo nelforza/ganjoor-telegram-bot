@@ -1,10 +1,11 @@
 #!/bin/python3
 
 import logging
+import sqlite3
 from telegram.ext import Updater, CommandHandler, Filters, MessageHandler
 from poets_glossary import poets_name_glossary
-from verses_query import query, random_verse_generator
-
+from verse_query import query
+from random_generator import random_verse
 
 # Logging 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -58,19 +59,29 @@ def poets(update, context):
 
 
 def poem(update, context):
+    connect = sqlite3.connect('database.sqlite')
+    cur = connect.cursor()
     chatID = update.effective_chat.id
     not_found_text = 'شاعری با این اسم پیدا نشد!'
     msg = update.message.text
     if msg not in poets_name_glossary.values():
         context.bot.send_message(chat_id=chatID, text=not_found_text)
-
+    else:
+        poet = (list(poets_name_glossary.keys())[list(poets_name_glossary.values()).index(msg)])
+        random_poem_id = random_verse(poet)  
+        verse_id = cur.execute('SELECT * FROM verses WHERE poemId = ?', (random_poem_id,))
+        verse = verse_id.fetchone()
+        poem = query(verse)
+        context.bot.send_message(chat_id=chatID, text=poem)
+    
+    
 
 
 def main():
     ####  Starting the bot ####
 
     # creates Updater and passes TOKEN
-    updater = Updater(token='Token', use_context=True)
+    updater = Updater(token='1084520890:AAGpxiBs4sw_XIDEny7sHbhAI9_oJ8Y7PLM', use_context=True)
     
     # Getting dispatcher to register handlers
     dp = updater.dispatcher
