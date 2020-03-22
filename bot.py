@@ -20,7 +20,7 @@ def error(update, context):
 # Start button command
 def start(update, context):
     chatID = update.effective_chat.id
-    welcome = ' کافیه اسم شاعر مورد نظرت رو بنویس تا بیت شعری ازش تقدیم کنیم'
+    welcome = 'کافیه اسم شاعرِ مورد نظرتون رو بنویسید تا بیتِ شعری از اون شاعر تقدیم کنیم.'
     commands = 'دستور /commands بهت کمک می‌کنه تا لیست دستورات موجود رو ببینی'
     context.bot.send_message(chat_id=chatID, text=welcome+'\n'+commands)
 
