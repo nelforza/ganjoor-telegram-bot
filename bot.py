@@ -13,7 +13,6 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 logger = logging.getLogger(__name__)
 
-
 def error(update, context):
     logger.warning('Update "%s" caused error "%s"', update, context.error)
 
@@ -74,12 +73,7 @@ def poem(update, context):
     if msg not in poets_name_glossary.values():
         context.bot.send_message(chat_id=chatID, text=not_found_text)
     else:
-        while True:
-            poem = msg_poem(msg)
-            poem_length = len(poem)
-            if poem_length != 2:
-                break
-
+        poem = msg_poem(msg)
         message_for_user = ''
         for index, i in enumerate(poem):
             if index == 0:
