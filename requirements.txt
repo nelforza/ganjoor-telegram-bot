@@ -1,0 +1,5 @@
+certifi==2019.11.28
+cffi==1.14.0
+cryptography==2.8
+python-telegram-bot==12.4.2
+tornado==6.0.4
