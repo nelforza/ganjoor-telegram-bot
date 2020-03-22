@@ -1,6 +1,5 @@
 import sqlite3
 from poets_glossary import poets_name_glossary
-from random import randint
 
 def query(verse):
     connect = sqlite3.connect('database.sqlite')
