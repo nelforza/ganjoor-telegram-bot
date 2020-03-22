@@ -72,7 +72,11 @@ def poem(update, context):
         verse_id = cur.execute('SELECT * FROM verses WHERE poemId = ?', (random_poem_id,))
         verse = verse_id.fetchone()
         poem = query(verse)
-        context.bot.send_message(chat_id=chatID, text=poem)
+        message_for_user = ''
+        for i in poem:
+            message_for_user += i + '\n'
+
+        context.bot.send_message(chat_id=chatID, text=message_for_user)
     
     
 
