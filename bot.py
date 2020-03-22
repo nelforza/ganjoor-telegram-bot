@@ -56,25 +56,38 @@ def poets(update, context):
     context.bot.send_message(chat_id=chatID, text=poets)
 
 
+def msg_poem(msg):
+    connect = sqlite3.connect('database.sqlite')
+    cur = connect.cursor()
+    poet = (list(poets_name_glossary.keys())[list(poets_name_glossary.values()).index(msg)])
+    random_poem_id = random_verse(poet)  
+    verse_id = cur.execute('SELECT * FROM verses WHERE poemId = ?', (random_poem_id,))
+    verse = verse_id.fetchone()
+    poem = query(verse)
+    return poem
 
 
 def poem(update, context):
-    connect = sqlite3.connect('database.sqlite')
-    cur = connect.cursor()
     chatID = update.effective_chat.id
     not_found_text = 'شاعری با این اسم پیدا نشد!'
     msg = update.message.text
     if msg not in poets_name_glossary.values():
         context.bot.send_message(chat_id=chatID, text=not_found_text)
     else:
-        poet = (list(poets_name_glossary.keys())[list(poets_name_glossary.values()).index(msg)])
-        random_poem_id = random_verse(poet)  
-        verse_id = cur.execute('SELECT * FROM verses WHERE poemId = ?', (random_poem_id,))
-        verse = verse_id.fetchone()
-        poem = query(verse)
+        while True:
+            poem = msg_poem(msg)
+            poem_length = len(poem)
+            if poem_length != 2:
+                break
+
         message_for_user = ''
-        for i in poem:
-            message_for_user += i + '\n'
+        for index, i in enumerate(poem):
+            if index == 0:
+                message_for_user += f'«{i}»' + '\n'
+            elif index == 2:
+                message_for_user += '\n'
+            else:
+                message_for_user += i + '\n'
 
         context.bot.send_message(chat_id=chatID, text=message_for_user)
     
