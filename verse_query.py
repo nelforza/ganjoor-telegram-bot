@@ -34,13 +34,13 @@ def query(verse):
 
         ## Query for the Poet name and Poem category
     Poem_ID = verse[1]
-    select_poems = g.cur.execute('SELECT * FROM poems WHERE id = ?', (Poem_ID,))
+    select_poems = cur.execute('SELECT * FROM poems WHERE id = ?', (Poem_ID,))
     query_poems = select_poems.fetchone()
 
 
     # Poem category
     category_id = int(query_poems[1])
-    select_category  = g.cur.execute('SELECT * FROM categories WHERE id = ?', (category_id,))
+    select_category  = cur.execute('SELECT * FROM categories WHERE id = ?', (category_id,))
     fetch_category = select_category.fetchone()
     poem_category = fetch_category[2]
     if poem_category not in poets_name_glossary.values() :    
