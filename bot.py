@@ -58,12 +58,14 @@ def poets(update, context):
 def msg_poem(msg):
     connect = sqlite3.connect('database.sqlite')
     cur = connect.cursor()
-    poet = (list(poets_name_glossary.keys())[list(poets_name_glossary.values()).index(msg)])
+    search_for_poet_key = [(k, v) for (k, v) in poets_name_glossary.items() if msg in v]
+    poet = [x[0] for x in search_for_poet_key][0]
     random_poem_id = random_verse(poet)  
     verse_id = cur.execute('SELECT * FROM verses WHERE poemId = ?', (random_poem_id,))
     verse = verse_id.fetchone()
     poem = query(verse)
     return poem
+
 
 def message_for_user(poem):
     message_for_user = ''
@@ -83,14 +85,18 @@ def poem(update, context):
     chatID = update.effective_chat.id
     not_found_text = 'شاعری با این اسم پیدا نشد!'
     msg = update.message.text
-    if msg not in poets_name_glossary.values():
+    poets_list = []
+    for x in poets_name_glossary.values():
+        poets_list.extend(x.split(' '))
+    
+    if msg not in poets_list:
         context.bot.send_message(chat_id=chatID, text=not_found_text)
     else:
         poem = msg_poem(msg)
-        if len(poem) > 100:
+        if len(poem) > 90:
             message_to_send = ''
-            first_part = poem[:100]
-            rest = len(poem) - 100
+            first_part = poem[:90]
+            rest = len(poem) - 90
             second_part = poem[-rest:]
             
             message_to_send += message_for_user(first_part)
@@ -113,7 +119,7 @@ def main():
     ####  Starting the bot ####
 
     # creates Updater and passes TOKEN
-    updater = Updater(token='TOKEN', use_context=True)
+    updater = Updater(token='Token', use_context=True)
     
     # Getting dispatcher to register handlers
     dp = updater.dispatcher
