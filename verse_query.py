@@ -1,16 +1,16 @@
 import sqlite3
 from poets_glossary import poets_name_glossary
 
-def query(verse, length=None):
+def query(verse, length):
     connect = sqlite3.connect('database.sqlite')
     cur = connect.cursor()
     # Checking verse order in DB
-    if length is None:
-        verse_order = int(verse[2])
-        break_point = 1
-    else:
+    if length == 'short':
         verse_order = int(verse[3])
         break_point = 0
+    elif length == 'long':
+        verse_order = int(verse[2])
+        break_point = 1
     
     """
     each verse is in one field in DB, I have to check it's order so I can get next and previous
