@@ -94,45 +94,51 @@ def message_for_user(poem):
 
 
 def poem(update, context):
+    
     chatID = update.effective_chat.id
     not_found_text = 'شاعری با این اسم پیدا نشد!'
     msg = update.message.text
-    # Breaking the poets name glossary dictionary values  by spliting them with space into a new list
-    # So users can use the poet firstname or lastname to get a poem 
-    # And  the poet full name is not required any more.
-
-    poets_list = []
-    for x in poets_name_glossary.values():
-        poets_list.extend(x.split(' '))
-
-    # checking if the user's message is really a poet name 
-    if msg not in poets_list:
-        context.bot.send_message(chat_id=chatID, text=not_found_text)
+    # Checing messages only with exclamation mark.
+    if list(msg)[0] != '!':
+        pass
     else:
-        """
-        ُTelegram has a limit on long messages so I tried to break long messages into two different messages
-        with restricting only  90 verses per message.
-        """
-        poem = msg_poem(msg)
-        if len(poem) > 90:
-            message_to_send = ''
-            first_part = poem[:90]
-            rest = len(poem) - 90
-            second_part = poem[-rest:]
-            
-            message_to_send += message_for_user(first_part)
-            context.bot.send_message(chat_id=chatID, text=message_to_send)
-            
-            second_message = ''
-            for mesra in second_part:
-                second_message += mesra + '\n'
+        # Removing the exclamation mark from message
+        msg = msg.replace(msg[:1], '')
+        # Breaking the poets name glossary dictionary values  by spliting them with space into a new list
+        # So users can use the poet firstname or lastname to get a poem 
+        # And  the poet full name is not required any more.
+        poets_list = []
+        for x in poets_name_glossary.values():
+            poets_list.extend(x.split(' '))
 
-            context.bot.send_message(chat_id=chatID, text=second_message)
-
+        # checking if the user's message is really a poet name 
+        if msg not in poets_list:
+            context.bot.send_message(chat_id=chatID, text=not_found_text)
         else:
-            message_to_send = message_for_user(poem)
-            context.bot.send_message(chat_id=chatID, text=message_to_send)
-    
+            """
+            ُTelegram has a limit on long messages so I tried to break long messages into two different messages
+            with restricting only  90 verses per message.
+            """
+            poem = msg_poem(msg)
+            if len(poem) > 90:
+                message_to_send = ''
+                first_part = poem[:90]
+                rest = len(poem) - 90
+                second_part = poem[-rest:]
+                
+                message_to_send += message_for_user(first_part)
+                context.bot.send_message(chat_id=chatID, text=message_to_send)
+                
+                second_message = ''
+                for mesra in second_part:
+                    second_message += mesra + '\n'
+
+                context.bot.send_message(chat_id=chatID, text=second_message)
+
+            else:
+                message_to_send = message_for_user(poem)
+                context.bot.send_message(chat_id=chatID, text=message_to_send)
+        
     
 
 
@@ -140,7 +146,7 @@ def main():
     ####  Starting the bot ####
 
     # creates Updater and passes TOKEN
-    updater = Updater(token='Token', use_context=True)
+    updater = Updater(token='1084520890:AAHUrTEytE9gdvpynDg_PRuMqwe8YT2dk3g', use_context=True)
     
     # Getting dispatcher to register handlers
     dp = updater.dispatcher
