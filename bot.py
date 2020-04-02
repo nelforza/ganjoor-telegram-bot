@@ -65,6 +65,19 @@ def msg_poem(msg):
     poem = query(verse)
     return poem
 
+def message_for_user(poem):
+    message_for_user = ''
+    for index, mesra in enumerate(poem):
+        if index == 0:
+            message_for_user += f'«{mesra}»' + '\n'
+        elif index == 2:
+            message_for_user += '\n'
+        else:
+            message_for_user += mesra + '\n'
+
+    return message_for_user
+
+
 
 def poem(update, context):
     chatID = update.effective_chat.id
@@ -74,16 +87,24 @@ def poem(update, context):
         context.bot.send_message(chat_id=chatID, text=not_found_text)
     else:
         poem = msg_poem(msg)
-        message_for_user = ''
-        for index, i in enumerate(poem):
-            if index == 0:
-                message_for_user += f'«{i}»' + '\n'
-            elif index == 2:
-                message_for_user += '\n'
-            else:
-                message_for_user += i + '\n'
+        if len(poem) > 100:
+            message_to_send = ''
+            first_part = poem[:100]
+            rest = len(poem) - 100
+            second_part = poem[-rest:]
+            
+            message_to_send += message_for_user(first_part)
+            context.bot.send_message(chat_id=chatID, text=message_to_send)
+            
+            second_message = ''
+            for mesra in second_part:
+                second_message += mesra + '\n'
 
-        context.bot.send_message(chat_id=chatID, text=message_for_user)
+            context.bot.send_message(chat_id=chatID, text=second_message)
+
+        else:
+            message_to_send = message_for_user(poem)
+            context.bot.send_message(chat_id=chatID, text=message_to_send)
     
     
 
@@ -122,3 +143,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
