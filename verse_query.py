@@ -1,13 +1,17 @@
 import sqlite3
 from poets_glossary import poets_name_glossary
 
-def query(verse):
+def query(verse, length=None):
     connect = sqlite3.connect('database.sqlite')
     cur = connect.cursor()
     # Checking verse order in DB
-
-    verse_order = int(verse[2])
-
+    if length is None:
+        verse_order = int(verse[2])
+        break_point = 1
+    else:
+        verse_order = int(verse[3])
+        break_point = 0
+    
     """
     each verse is in one field in DB, I have to check it's order so I can get next and previous
     related verses the random verse chosen by user.
@@ -17,7 +21,7 @@ def query(verse):
         new_id = (verse[0] + order_count) # Get the next verse of the random verse
         order = cur.execute('SELECT * FROM verses WHERE id = ?', (new_id,))
         order_query = order.fetchone()
-        if order_query[2] == 1: # checks if the next verse is related to random one
+        if order_query[2] == break_point: # checks if the next verse is related to random one
             break 
         else:
             order_count += 1
