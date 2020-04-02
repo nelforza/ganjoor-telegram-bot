@@ -6,6 +6,7 @@ from telegram.ext import Updater, CommandHandler, Filters, MessageHandler
 from poets_glossary import poets_name_glossary
 from verse_query import query
 from random_generator import random_verse
+from poets_Persian_names_list import poets_persian_name_list
 
 # Logging 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -57,7 +58,7 @@ def poets(update, context):
     context.bot.send_message(chat_id=chatID, text=poets)
 
 
-def msg_poem(msg):
+def msg_poem(msg, length):
     connect = sqlite3.connect('database.sqlite')
     cur = connect.cursor()
     # Searching for English name of the poet which user has given it in Persian
@@ -69,7 +70,7 @@ def msg_poem(msg):
     verse_id = cur.execute('SELECT * FROM verses WHERE poemId = ?', (random_poem_id,))
     verse = verse_id.fetchone()
     # Query for the random Poem ID to find the whole poem
-    poem = query(verse)
+    poem = query(verse, length)
     return poem
 
 
@@ -96,49 +97,58 @@ def message_for_user(poem):
 def poem(update, context):
     
     chatID = update.effective_chat.id
-    not_found_text = 'شاعری با این اسم پیدا نشد!'
     msg = update.message.text
+
     # Checing messages only with exclamation mark.
     if list(msg)[0] != '!':
         pass
     else:
         # Removing the exclamation mark from message
         msg = msg.replace(msg[:1], '')
-        # Breaking the poets name glossary dictionary values  by spliting them with space into a new list
-        # So users can use the poet firstname or lastname to get a poem 
-        # And  the poet full name is not required any more.
-        poets_list = []
-        for x in poets_name_glossary.values():
-            poets_list.extend(x.split(' '))
+        print(msg)
+        msg = msg.split('-')
+        print(msg)
+        if len(msg) == 2:
+            if 'بلند' in msg:
+                length = 'long'
+                msg.remove('بلند')
+            elif 'کوتاه' in msg:
+                length = 'short'
+                msg.remove('کوتاه')
+            
+            msg = msg[0]
+            print(msg)
 
-        # checking if the user's message is really a poet name 
-        if msg not in poets_list:
-            context.bot.send_message(chat_id=chatID, text=not_found_text)
-        else:
-            """
-            ُTelegram has a limit on long messages so I tried to break long messages into two different messages
-            with restricting only  90 verses per message.
-            """
-            poem = msg_poem(msg)
-            if len(poem) > 90:
-                message_to_send = ''
-                first_part = poem[:90]
-                rest = len(poem) - 90
-                second_part = poem[-rest:]
-                
-                message_to_send += message_for_user(first_part)
-                context.bot.send_message(chat_id=chatID, text=message_to_send)
-                
-                second_message = ''
-                for mesra in second_part:
-                    second_message += mesra + '\n'
-
-                context.bot.send_message(chat_id=chatID, text=second_message)
-
+            # checking if the user's message is really a poet name 
+            if msg not in poets_persian_name_list:
+                not_found_text = 'شاعری با این اسم پیدا نشد!'
+                context.bot.send_message(chat_id=chatID, text=not_found_text)
             else:
-                message_to_send = message_for_user(poem)
-                context.bot.send_message(chat_id=chatID, text=message_to_send)
-        
+                """
+                ُTelegram has a limit on long messages so I tried to break long messages into two different messages
+                with restricting only  90 verses per message.
+                """
+                poem = msg_poem(msg, length)
+                if len(poem) > 90:
+                    message_to_send = ''
+                    first_part = poem[:90]
+                    rest = len(poem) - 90
+                    second_part = poem[-rest:]
+                    
+                    message_to_send += message_for_user(first_part)
+                    context.bot.send_message(chat_id=chatID, text=message_to_send)
+                    
+                    second_message = ''
+                    for mesra in second_part:
+                        second_message += mesra + '\n'
+
+                    context.bot.send_message(chat_id=chatID, text=second_message)
+
+                else:
+                    message_to_send = message_for_user(poem)
+                    context.bot.send_message(chat_id=chatID, text=message_to_send)
+        else:
+            pass
     
 
 
@@ -146,7 +156,7 @@ def main():
     ####  Starting the bot ####
 
     # creates Updater and passes TOKEN
-    updater = Updater(token='1084520890:AAHUrTEytE9gdvpynDg_PRuMqwe8YT2dk3g', use_context=True)
+    updater = Updater(token='Token', use_context=True)
     
     # Getting dispatcher to register handlers
     dp = updater.dispatcher
