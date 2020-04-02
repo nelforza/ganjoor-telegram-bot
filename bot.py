@@ -13,6 +13,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 logger = logging.getLogger(__name__)
 
+# Error logging
 def error(update, context):
     logger.warning('Update "%s" caused error "%s"', update, context.error)
 
@@ -50,6 +51,7 @@ def commands(update, context):
 def poets(update, context):
     chatID = update.effective_chat.id
     poets = ''
+    # searches in poets dictionary and provides it's values which are poets names in Persian
     for value in poets_name_glossary.values():
         poets += str(value)+'\n'
     context.bot.send_message(chat_id=chatID, text=poets)
@@ -58,21 +60,31 @@ def poets(update, context):
 def msg_poem(msg):
     connect = sqlite3.connect('database.sqlite')
     cur = connect.cursor()
+    # Searching for English name of the poet which user has given it in Persian
     search_for_poet_key = [(k, v) for (k, v) in poets_name_glossary.items() if msg in v]
+    # Accessing the poet English name from a tuple inside a list
     poet = [x[0] for x in search_for_poet_key][0]
+    # Finding a relevant random Poem ID
     random_poem_id = random_verse(poet)  
     verse_id = cur.execute('SELECT * FROM verses WHERE poemId = ?', (random_poem_id,))
     verse = verse_id.fetchone()
+    # Query for the random Poem ID to find the whole poem
     poem = query(verse)
     return poem
 
 
 def message_for_user(poem):
+    """
+    extacting verses of the poem from array to string.
+    """
+
     message_for_user = ''
     for index, mesra in enumerate(poem):
         if index == 0:
+            # Adding poet's name to the beginning of the message
             message_for_user += f'«{mesra}»' + '\n'
         elif index == 2:
+            # just to add some space between poem information and the poem itself
             message_for_user += '\n'
         else:
             message_for_user += mesra + '\n'
@@ -85,13 +97,22 @@ def poem(update, context):
     chatID = update.effective_chat.id
     not_found_text = 'شاعری با این اسم پیدا نشد!'
     msg = update.message.text
+    # Breaking the poets name glossary dictionary values  by spliting them with space into a new list
+    # So users can use the poet firstname or lastname to get a poem 
+    # And  the poet full name is not required any more.
+
     poets_list = []
     for x in poets_name_glossary.values():
         poets_list.extend(x.split(' '))
-    
+
+    # checking if the user's message is really a poet name 
     if msg not in poets_list:
         context.bot.send_message(chat_id=chatID, text=not_found_text)
     else:
+        """
+        ُTelegram has a limit on long messages so I tried to break long messages into two different messages
+        with restricting only  90 verses per message.
+        """
         poem = msg_poem(msg)
         if len(poem) > 90:
             message_to_send = ''
