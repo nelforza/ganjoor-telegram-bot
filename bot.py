@@ -105,9 +105,8 @@ def poem(update, context):
     else:
         # Removing the exclamation mark from message
         msg = msg.replace(msg[:1], '')
-        print(msg)
         msg = msg.split('-')
-        print(msg)
+        
         if len(msg) == 2:
             if 'بلند' in msg:
                 length = 'long'
@@ -117,7 +116,6 @@ def poem(update, context):
                 msg.remove('کوتاه')
             
             msg = msg[0]
-            print(msg)
 
             # checking if the user's message is really a poet name 
             if msg not in poets_persian_name_list:
