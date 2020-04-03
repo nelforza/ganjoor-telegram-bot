@@ -1,5 +1,5 @@
 import sqlite3
-from poets_glossary import poets_name_glossary
+from poets_names import poets_fullnames_dic
 from random import randint
 
 def random_verse(poet):
