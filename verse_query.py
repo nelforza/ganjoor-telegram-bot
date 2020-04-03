@@ -1,17 +1,9 @@
 import sqlite3
-from poets_glossary import poets_name_glossary
+from poets_names import poets_fullnames_dic
 
-def query(verse, length):
+def relevant_verse_finder(break_point, verse_order, verse):
     connect = sqlite3.connect('database.sqlite')
     cur = connect.cursor()
-    # Checking verse order in DB
-    if length == 'short':
-        verse_order = int(verse[3])
-        break_point = 0
-    elif length == 'long':
-        verse_order = int(verse[2])
-        break_point = 1
-    
     """
     each verse is in one field in DB, I have to check it's order so I can get next and previous
     related verses the random verse chosen by user.
@@ -47,16 +39,27 @@ def query(verse, length):
     select_category  = cur.execute('SELECT * FROM categories WHERE id = ?', (category_id,))
     fetch_category = select_category.fetchone()
     poem_category = fetch_category[2]
-    if poem_category not in poets_name_glossary.values() :    
+    if poem_category not in poets_fullnames_dic.values() :    
         poem.insert(0, str(poem_category))
 
     # poet name
     url = str(query_poems[3])
     if bool(url) == True:
         poet_name = url.split('/')[3]
-        poet_name = poets_name_glossary[poet_name]
+        poet_name = poets_fullnames_dic[poet_name]
         poem.insert(0, poet_name)
 
 
     return poem
+
+def query(verse, length):
+    # Checking verse order in DB
+    if length == 'long':
+        return relevant_verse_finder(break_point=1, verse_order=int(verse[2]), verse=verse)
+    elif length == 'short':
+        return relevant_verse_finder(break_point=0, verse_order=int(verse[3]), verse=verse)
+    
+    
+
+
 
